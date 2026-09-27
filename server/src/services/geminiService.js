@@ -65,14 +65,34 @@ ${resumeText}
 ${jobDescriptionText}
 `;
 
-  const response = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL || "gemini-3.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: analysisSchema,
-    },
-  });
+  const primaryModel = process.env.GEMINI_MODEL || "gemini-flash-latest";
+
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model: primaryModel,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: analysisSchema,
+      },
+    });
+  } catch (error) {
+    // If primary model experiences a temporary high-demand spike or error, try gemini-flash-latest
+    if (primaryModel !== "gemini-flash-latest") {
+      console.warn(`Primary model ${primaryModel} failed, falling back to gemini-flash-latest...`);
+      response = await ai.models.generateContent({
+        model: "gemini-flash-latest",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: analysisSchema,
+        },
+      });
+    } else {
+      throw error;
+    }
+  }
 
   // Parse the structured JSON response into a JavaScript object
   const parsedResult = JSON.parse(response.text);

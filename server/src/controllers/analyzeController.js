@@ -64,8 +64,16 @@ const analyzeResumeController = async (req, res) => {
     // Log error internally for debugging without exposing sensitive details or API keys
     console.error("Error analyzing resume:", error.message || error);
 
+    const isHighDemand =
+      error?.status === 503 ||
+      (typeof error?.message === "string" && error.message.includes("503"));
+
+    const errorMessage = isHighDemand
+      ? "Google Gemini is currently experiencing a temporary demand spike. Please wait a few seconds and try again."
+      : "Failed to analyze resume. Please try again.";
+
     return res.status(500).json({
-      error: "Failed to analyze resume",
+      error: errorMessage,
     });
   }
 };
