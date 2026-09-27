@@ -17,6 +17,11 @@ The application uses Google Gemini to analyze the resume and job description and
 - Secure API key handling using environment variables
 - No database required
 
+
+![alt text](image.png)
+![alt text](image-1.png)
+
+
 ## Tech Stack
 
 ### Frontend
